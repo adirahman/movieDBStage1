@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
     ListMoviesDao listTopRated = new ListMoviesDao();
     ProgressDialog progressDialog;
 
+    public static final String BUNDLE_MOVIE_DATA = "bundle_movie_data";
+
     private static final String NOW_PLAYING = "nowPlaying";
     private static final String LIST_UP_COMING = "listUpComing";
     private static final String LIST_POPULAR = "listPopular";
@@ -198,10 +200,32 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
     }
     private void setupViewPager(ViewPager pager){
         MainViewPagerAdapter adapter = new MainViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFrag(new MovieFragment(nowPlaying),"Now Playing");
-        adapter.addFrag(new MovieFragment(listUpComing),"Up Coming");
-        adapter.addFrag(new MovieFragment(listPopular),"Popular");
-        adapter.addFrag(new MovieFragment(listTopRated),"Top Rated");
+
+
+        MovieFragment movieFragment = new MovieFragment();
+        Bundle bundleData = new Bundle();
+        bundleData.putParcelable(BUNDLE_MOVIE_DATA,nowPlaying);
+        movieFragment.setArguments(bundleData);
+        adapter.addFrag(movieFragment,"Now Playing");
+
+        bundleData = new Bundle();
+        movieFragment = new MovieFragment();
+        bundleData.putParcelable(BUNDLE_MOVIE_DATA,listUpComing);
+        movieFragment.setArguments(bundleData);
+        adapter.addFrag(movieFragment,"Up Coming");
+
+        bundleData = new Bundle();
+        movieFragment = new MovieFragment();
+        bundleData.putParcelable(BUNDLE_MOVIE_DATA,listPopular);
+        movieFragment.setArguments(bundleData);
+        adapter.addFrag(movieFragment,"Popular");
+
+
+        bundleData = new Bundle();
+        movieFragment = new MovieFragment();
+        bundleData.putParcelable(BUNDLE_MOVIE_DATA,listTopRated);
+        movieFragment.setArguments(bundleData);
+        adapter.addFrag(movieFragment,"Top Rated");
 
         pager.setAdapter(adapter);
         int a = adapter.getCount();

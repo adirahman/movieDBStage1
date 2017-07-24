@@ -39,11 +39,11 @@ public class MovieFragment extends Fragment implements MovieAdapter.MoviewAdapte
         // Required empty public constructor
     }
 
-    @SuppressLint("ValidFragment")
+    /*@SuppressLint("ValidFragment")
     public MovieFragment(ListMoviesDao data){
         this.data = data;
         listMovies.addAll(data.results);
-    }
+    }*/
 
     @Override
     public void onAttach(Context context) {
@@ -55,6 +55,7 @@ public class MovieFragment extends Fragment implements MovieAdapter.MoviewAdapte
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_movie, container, false);
+        data = getArguments().getParcelable(MainActivity.BUNDLE_MOVIE_DATA);
 
         final FrameLayout frameLayout = (FrameLayout) v.findViewById(R.id.fl);
         frameLayout.setBackgroundColor(color);
