@@ -1,14 +1,18 @@
 package com.adi.moviedbstage1;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +23,8 @@ import com.adi.moviedbstage1.dao.ListVideo;
 import com.adi.moviedbstage1.dao.MovieDao;
 import com.adi.moviedbstage1.dao.MovieDetailDao;
 import com.adi.moviedbstage1.dao.VideoData;
+import com.adi.moviedbstage1.database.FavoriteDBHelper;
+import com.adi.moviedbstage1.database.FavoriteMovieContract;
 import com.squareup.picasso.Picasso;
 
 import retrofit2.Call;
@@ -31,10 +37,13 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
     MovieDao dataMovie;
     ImageView ivPoster;
     TextView tvTitle,tvDesc,tvVote,tvRelease;
+    Button btnAddFavorite;
     RecyclerView recyclerView;
     TrailerAdapter adapter;
 
     ProgressDialog progressDialog;
+
+    private SQLiteDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +56,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         tvDesc = (TextView) findViewById(R.id.tv_desc);
         tvVote = (TextView) findViewById(R.id.tv_vote);
         tvRelease = (TextView) findViewById(R.id.tv_release_date);
+        btnAddFavorite = (Button) findViewById(R.id.btn_favorite);
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
         LinearLayoutManager llm = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
         recyclerView.setLayoutManager(llm);
@@ -55,6 +65,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         progressDialog.setMessage("Please Wait Initializing Detail Movie Progress...");
         progressDialog.show();
         getData();
+        initDB();
     }
 
     public static void startThisActivity(Context context,MovieDao movieDao){
@@ -107,5 +118,19 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
     public void onClick(VideoData videoData) {
         //Toast.makeText(MovieDetailActivity.this,videoData.key,Toast.LENGTH_LONG).show();
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.WATCH_TRAILER_URL+videoData.key)));
+    }
+
+    private void initDB(){
+        FavoriteDBHelper dbHelper = new FavoriteDBHelper(this);
+        mDb = dbHelper.getWritableDatabase();
+    }
+
+    public void addFavoriteMovie(View view){
+        ContentValues cv = new ContentValues();
+        cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_ID_MOVIE, dataMovie.id);
+        cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_ORIGINAL_TITLE,dataMovie.original_title);
+        cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_VOTE_AVERAGE,dataMovie.vote_average);
+
+        mDb.insert(FavoriteMovieContract.FavoriteEntry.TABLE_NAME,null,cv);
     }
 }

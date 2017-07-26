@@ -3,6 +3,7 @@ package com.adi.moviedbstage1;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Movie;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -61,9 +62,7 @@ public class MovieFragment extends Fragment implements MovieAdapter.MoviewAdapte
         frameLayout.setBackgroundColor(color);
         recyclerView = (RecyclerView) v.findViewById(R.id.recycler);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2,LinearLayoutManager.VERTICAL,false);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setHasFixedSize(true);
+        detectOrientationScreen();
 
         setData();
 
@@ -76,6 +75,18 @@ public class MovieFragment extends Fragment implements MovieAdapter.MoviewAdapte
         adapter.notifyDataSetChanged();
     }
 
+    private void detectOrientationScreen(){
+        int orientation = this.getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT){
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),2,LinearLayoutManager.VERTICAL,false);
+            recyclerView.setLayoutManager(gridLayoutManager);
+            recyclerView.setHasFixedSize(true);
+        }else{
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(),3,LinearLayoutManager.VERTICAL,false);
+            recyclerView.setLayoutManager(gridLayoutManager);
+            recyclerView.setHasFixedSize(true);
+        }
+    }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

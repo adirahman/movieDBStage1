@@ -5,6 +5,7 @@ import android.support.v7.util.DiffUtil;
 
 import com.adi.moviedbstage1.Constants;
 import com.adi.moviedbstage1.dao.ListMoviesDao;
+import com.adi.moviedbstage1.dao.ListReviewsDao;
 import com.adi.moviedbstage1.dao.ListVideo;
 import com.adi.moviedbstage1.dao.MovieDetailDao;
 
@@ -43,6 +44,11 @@ public class MovieAPI {
 
     public static void requestListTrailer(int movieId, Callback<ListVideo> callback){
         Call<ListVideo> call = RetrofitClient.getApiInstance().getApiService().getListVideo(movieId,Constants.api_key);
+        call.enqueue(callback);
+    }
+
+    public static void requestListReviews(int movieId, Callback<ListReviewsDao> callback){
+        Call<ListReviewsDao> call = RetrofitClient.getApiInstance().getApiService().getListReview(movieId,Constants.api_key);
         call.enqueue(callback);
     }
 }

@@ -1,6 +1,7 @@
 package com.adi.moviedbstage1.api.core;
 
 import com.adi.moviedbstage1.dao.ListMoviesDao;
+import com.adi.moviedbstage1.dao.ListReviewsDao;
 import com.adi.moviedbstage1.dao.ListVideo;
 import com.adi.moviedbstage1.dao.MovieDetailDao;
 
@@ -40,4 +41,8 @@ public interface ApiService {
 
     @GET("movie/{id}/videos?")
     Call<ListVideo> getListVideo(@Path("id")int movieId,@Query("api_key") String apiKey);
+
+    @GET("moview/{id}/reviews?")
+    Call<ListReviewsDao> getListReview(@Path("id")int movieId,@Query("api_key") String apiKey);
+
 }

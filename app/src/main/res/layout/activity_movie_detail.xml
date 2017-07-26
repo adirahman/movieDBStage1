@@ -67,8 +67,37 @@
 
         </LinearLayout>
 
+        <Button
+            android:id="@+id/btn_favorite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_favorite"
+            android:onClick="addFavoriteMovie"/>
+
+        <TextView
+            android:text="Trailer"
+            style="@style/TextAppearance.AppCompat.Large"
+            android:fontFamily="cursive"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"/>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:text="Reviews"
+            style="@style/TextAppearance.AppCompat.Large"
+            android:fontFamily="cursive"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_reviews"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

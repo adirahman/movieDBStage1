@@ -1,6 +1,8 @@
 package com.adi.moviedbstage1;
 
 import android.app.ProgressDialog;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -19,12 +21,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.adi.moviedbstage1.adapter.MainViewPagerAdapter;
 import com.adi.moviedbstage1.api.core.MovieAPI;
 import com.adi.moviedbstage1.dao.ListMoviesDao;
 import com.adi.moviedbstage1.dao.MovieDao;
 import com.adi.moviedbstage1.dao.MovieDetailDao;
+import com.adi.moviedbstage1.database.FavoriteDBHelper;
+import com.adi.moviedbstage1.database.FavoriteMovieContract;
+import com.adi.moviedbstage1.database.TestUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
 
     int flag = 0;
     int getPositionTab = 0;
+
+    private SQLiteDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
             fetchDataFromAPI();
         }
 
+        initDB();
     }
 
     public void fetchDataFromAPI(){
@@ -271,9 +280,30 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
                 progressDialog.setCancelable(false);
                 progressDialog.setMessage("Refresh data movie db...");
                 return true;
+            case R.id.action_favorite:
+
         }
         return super.onOptionsItemSelected(item);
     }
 
+    public void initDB(){
+        FavoriteDBHelper dbHelper = new FavoriteDBHelper(this);
+        mDb = dbHelper.getReadableDatabase();
+        //TestUtils.insertFakeData(mDb);
+        Cursor cursor = getAllFavorite();
+        Log.d("DB Movie",cursor.getCount()+"");
+        Toast.makeText(MainActivity.this,cursor.getCount()+"",Toast.LENGTH_LONG).show();
+    }
 
+    public Cursor getAllFavorite(){
+        return mDb.query(
+                FavoriteMovieContract.FavoriteEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                FavoriteMovieContract.FavoriteEntry.COLUMN_TIMESTAMP
+        );
+    }
 }
