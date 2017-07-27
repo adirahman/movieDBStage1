@@ -15,31 +15,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.adi.moviedbstage1.adapter.ReviewAdapter;
 import com.adi.moviedbstage1.adapter.TrailerAdapter;
 import com.adi.moviedbstage1.api.core.MovieAPI;
+import com.adi.moviedbstage1.dao.ListReviewsDao;
 import com.adi.moviedbstage1.dao.ListVideo;
 import com.adi.moviedbstage1.dao.MovieDao;
-import com.adi.moviedbstage1.dao.MovieDetailDao;
+import com.adi.moviedbstage1.dao.ReviewDao;
 import com.adi.moviedbstage1.dao.VideoData;
-import com.adi.moviedbstage1.database.FavoriteDBHelper;
-import com.adi.moviedbstage1.database.FavoriteMovieContract;
+import com.adi.moviedbstage1.database.favorite.FavoriteDBHelper;
+import com.adi.moviedbstage1.database.favorite.FavoriteMovieContract;
 import com.squareup.picasso.Picasso;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MovieDetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterListener{
+public class MovieDetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterListener,ReviewAdapter.ReviewAdapaterListener{
 
     String TAG = MovieDetailActivity.class.getSimpleName();
     MovieDao dataMovie;
     ImageView ivPoster;
-    TextView tvTitle,tvDesc,tvVote,tvRelease;
+    TextView tvTitle,tvDesc,tvVote,tvRelease,tvNoReviews;
     Button btnAddFavorite;
-    RecyclerView recyclerView;
-    TrailerAdapter adapter;
+    RecyclerView trailerRecyclerView,reviewRecyclerView;
+    TrailerAdapter trailerAdapter;
+    ReviewAdapter reviewAdapter;
 
     ProgressDialog progressDialog;
 
@@ -56,10 +58,14 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         tvDesc = (TextView) findViewById(R.id.tv_desc);
         tvVote = (TextView) findViewById(R.id.tv_vote);
         tvRelease = (TextView) findViewById(R.id.tv_release_date);
+        tvNoReviews = (TextView) findViewById(R.id.tv_no_reviews);
         btnAddFavorite = (Button) findViewById(R.id.btn_favorite);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler);
+        trailerRecyclerView = (RecyclerView) findViewById(R.id.recycler);
+        reviewRecyclerView = (RecyclerView) findViewById(R.id.recycler_reviews);
         LinearLayoutManager llm = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
-        recyclerView.setLayoutManager(llm);
+        LinearLayoutManager llm2 = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
+        reviewRecyclerView.setLayoutManager(llm2);
+        trailerRecyclerView.setLayoutManager(llm);
 
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Please Wait Initializing Detail Movie Progress...");
@@ -86,6 +92,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         tvRelease.setText("Release Date : "+dataMovie.release_date);
 
         getTrailer();
+        getReviews();
     }
 
     public void getTrailer(){
@@ -96,9 +103,9 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         @Override
         public void onResponse(Call<ListVideo> call, Response<ListVideo> response) {
             if(response.isSuccessful()){
-                adapter = new TrailerAdapter(response.body().results,MovieDetailActivity.this,MovieDetailActivity.this);
-                recyclerView.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
+                trailerAdapter = new TrailerAdapter(response.body().results,MovieDetailActivity.this,MovieDetailActivity.this);
+                trailerRecyclerView.setAdapter(trailerAdapter);
+                trailerAdapter.notifyDataSetChanged();
 
                 Log.d(TAG,"response success");
             }else {
@@ -114,6 +121,35 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         }
     };
 
+    private void getReviews(){
+        MovieAPI.requestListReviews(dataMovie.id,callbackReviews);
+    }
+
+    Callback<ListReviewsDao> callbackReviews = new Callback<ListReviewsDao>() {
+        @Override
+        public void onResponse(Call<ListReviewsDao> call, Response<ListReviewsDao> response) {
+            if(response.isSuccessful()){
+                Log.d("Reviews","success");
+                if(response.body().results.size() > 0){
+                    reviewAdapter = new ReviewAdapter(response.body().results,MovieDetailActivity.this,MovieDetailActivity.this);
+                    reviewRecyclerView.setAdapter(reviewAdapter);
+                    reviewAdapter.notifyDataSetChanged();
+                }else{
+                    tvNoReviews.setVisibility(View.VISIBLE);
+                    reviewRecyclerView.setVisibility(View.GONE);
+                }
+            }else{
+                Log.d("Reviews","failed on response");
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ListReviewsDao> call, Throwable t) {
+            Log.d("Reviews","on failure : "+t.getMessage());
+        }
+    };
+
+    // trailer on Click
     @Override
     public void onClick(VideoData videoData) {
         //Toast.makeText(MovieDetailActivity.this,videoData.key,Toast.LENGTH_LONG).show();
@@ -132,5 +168,11 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_VOTE_AVERAGE,dataMovie.vote_average);
 
         mDb.insert(FavoriteMovieContract.FavoriteEntry.TABLE_NAME,null,cv);
+    }
+
+    // review onClick
+    @Override
+    public void onClick(ReviewDao reviewData) {
+
     }
 }

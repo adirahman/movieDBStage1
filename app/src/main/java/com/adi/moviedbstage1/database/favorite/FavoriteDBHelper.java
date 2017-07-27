@@ -1,4 +1,4 @@
-package com.adi.moviedbstage1.database;
+package com.adi.moviedbstage1.database.favorite;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

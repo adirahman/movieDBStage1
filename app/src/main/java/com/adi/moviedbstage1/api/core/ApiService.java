@@ -42,7 +42,7 @@ public interface ApiService {
     @GET("movie/{id}/videos?")
     Call<ListVideo> getListVideo(@Path("id")int movieId,@Query("api_key") String apiKey);
 
-    @GET("moview/{id}/reviews?")
+    @GET("movie/{id}/reviews?")
     Call<ListReviewsDao> getListReview(@Path("id")int movieId,@Query("api_key") String apiKey);
 
 }

@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.adi.moviedbstage1.database.favorite.FavoriteMovieContract;
+
 import java.util.ArrayList;
 import java.util.List;
 

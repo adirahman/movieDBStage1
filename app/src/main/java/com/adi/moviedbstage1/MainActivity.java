@@ -14,11 +14,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -27,10 +25,8 @@ import com.adi.moviedbstage1.adapter.MainViewPagerAdapter;
 import com.adi.moviedbstage1.api.core.MovieAPI;
 import com.adi.moviedbstage1.dao.ListMoviesDao;
 import com.adi.moviedbstage1.dao.MovieDao;
-import com.adi.moviedbstage1.dao.MovieDetailDao;
-import com.adi.moviedbstage1.database.FavoriteDBHelper;
-import com.adi.moviedbstage1.database.FavoriteMovieContract;
-import com.adi.moviedbstage1.database.TestUtils;
+import com.adi.moviedbstage1.database.favorite.FavoriteDBHelper;
+import com.adi.moviedbstage1.database.favorite.FavoriteMovieContract;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -88,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
             fetchDataFromAPI();
         }
 
-        initDB();
+        //initDB();
     }
 
     public void fetchDataFromAPI(){
@@ -139,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
         @Override
         public void onFailure(Call<ListMoviesDao> call, Throwable t) {
             Log.e(TAG,t.getMessage());
+            progressDialog.dismiss();
+            Toast.makeText(MainActivity.this,"Cannot fetch data",Toast.LENGTH_LONG).show();
         }
     };
 
@@ -286,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
         return super.onOptionsItemSelected(item);
     }
 
-    public void initDB(){
+    private void initDB(){
         FavoriteDBHelper dbHelper = new FavoriteDBHelper(this);
         mDb = dbHelper.getReadableDatabase();
         //TestUtils.insertFakeData(mDb);
