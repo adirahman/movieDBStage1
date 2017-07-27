@@ -23,10 +23,15 @@ import android.widget.Toast;
 
 import com.adi.moviedbstage1.adapter.MainViewPagerAdapter;
 import com.adi.moviedbstage1.api.core.MovieAPI;
+import com.adi.moviedbstage1.dao.DatesDao;
 import com.adi.moviedbstage1.dao.ListMoviesDao;
 import com.adi.moviedbstage1.dao.MovieDao;
+import com.adi.moviedbstage1.database.TestUtils;
 import com.adi.moviedbstage1.database.favorite.FavoriteDBHelper;
 import com.adi.moviedbstage1.database.favorite.FavoriteMovieContract;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -84,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
             fetchDataFromAPI();
         }
 
-        //initDB();
+        initDB();
     }
 
     public void fetchDataFromAPI(){
@@ -285,13 +290,16 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
     }
 
     private void initDB(){
+        List<MovieDao> temp = new ArrayList<>();
         FavoriteDBHelper dbHelper = new FavoriteDBHelper(this);
         mDb = dbHelper.getReadableDatabase();
         //TestUtils.insertFakeData(mDb);
         Cursor cursor = getAllFavorite();
+        //temp.addAll(populateMovies(cursor));
         Log.d("DB Movie",cursor.getCount()+"");
         Toast.makeText(MainActivity.this,cursor.getCount()+"",Toast.LENGTH_LONG).show();
     }
+
 
     public Cursor getAllFavorite(){
         return mDb.query(
@@ -303,5 +311,30 @@ public class MainActivity extends AppCompatActivity implements MoviePassInterfac
                 null,
                 FavoriteMovieContract.FavoriteEntry.COLUMN_TIMESTAMP
         );
+    }
+
+    /*private ListMoviesDao populateWholeMovie(){
+        int page = 1;
+        DatesDao dates = new DatesDao("0","1");
+        int total_pages = 1;
+        int total_results = 1;
+    }*/
+
+    private List<MovieDao> populateMovies(Cursor cursor){
+        List<MovieDao> movies = new ArrayList<>();
+        for (int i = 0; i < cursor.getCount(); i++) {
+            cursor.moveToPosition(i);
+            MovieDao a = new MovieDao();
+            a.id = cursor.getInt(cursor.getColumnIndex(FavoriteMovieContract.FavoriteEntry.COLUMN_ID_MOVIE));
+            a.original_title = cursor.getString(cursor.getColumnIndex(FavoriteMovieContract.FavoriteEntry.COLUMN_ORIGINAL_TITLE));
+            a.overview = cursor.getString(cursor.getColumnIndex(FavoriteMovieContract.FavoriteEntry.COLUMN_OVERVIEW));
+            a.backdrop_path = cursor.getString(cursor.getColumnIndex(FavoriteMovieContract.FavoriteEntry.COLUMN_BACKDROP_PATH));
+            a.vote_average = cursor.getDouble(cursor.getColumnIndex(FavoriteMovieContract.FavoriteEntry.COLUMN_VOTE_AVERAGE));
+            a.release_date = cursor.getString(cursor.getColumnIndex(FavoriteMovieContract.FavoriteEntry.COLUMN_RELEASE_DATE));
+
+            movies.add(a);
+        }
+
+        return movies;
     }
 }

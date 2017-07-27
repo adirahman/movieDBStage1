@@ -11,6 +11,11 @@ public class DatesDao implements Parcelable {
     public String maximum;
     public String minimum;
 
+    public DatesDao(String maximum, String minimum) {
+        this.maximum = maximum;
+        this.minimum = minimum;
+    }
+
     protected DatesDao(Parcel in) {
         maximum = in.readString();
         minimum = in.readString();

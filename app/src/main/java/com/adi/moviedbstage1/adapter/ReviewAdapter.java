@@ -20,9 +20,9 @@ import java.util.List;
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewVh>{
     private List<ReviewDao> listReview = new ArrayList<>();
     private Context context;
-    private TrailerAdapter.TrailerAdapterListener listener;
+    private ReviewAdapaterListener listener;
 
-    public ReviewAdapter(List<ReviewDao> listReview, Context context, TrailerAdapter.TrailerAdapterListener listener) {
+    public ReviewAdapter(List<ReviewDao> listReview, Context context, ReviewAdapaterListener listener) {
         this.listReview = listReview;
         this.context = context;
         this.listener = listener;
@@ -47,6 +47,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewVh>{
     class ReviewVh extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView tvAuthor;
         private TextView tvContent;
+        ReviewDao itemReview;
 
         public ReviewVh(View itemView){
             super(itemView);
@@ -56,12 +57,13 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewVh>{
         }
 
         void bind(ReviewDao item){
+            itemReview = item;
             tvAuthor.setText(item.author);
             tvContent.setText(item.content);
         }
         @Override
         public void onClick(View v) {
-
+            listener.onClick(itemReview);
         }
     }
 

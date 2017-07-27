@@ -25,6 +25,10 @@ public class MovieDao implements Parcelable {
     public boolean video;
     public double vote_average;
 
+
+    public MovieDao() {
+    }
+
     protected MovieDao(Parcel in) {
         poster_path = in.readString();
         adult = in.readByte() != 0x00;

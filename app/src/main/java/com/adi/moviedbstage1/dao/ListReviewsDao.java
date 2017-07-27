@@ -17,6 +17,7 @@ public class ListReviewsDao implements Parcelable {
     public int total_pages ;
     public int total_results ;
 
+    public ListReviewsDao(){}
     protected ListReviewsDao(Parcel in) {
         id = in.readInt();
         page = in.readInt();

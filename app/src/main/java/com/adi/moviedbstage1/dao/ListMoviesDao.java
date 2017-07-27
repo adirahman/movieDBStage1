@@ -20,6 +20,14 @@ public class ListMoviesDao implements Parcelable {
     public ListMoviesDao() {
     }
 
+    public ListMoviesDao(int page, List<MovieDao> results, DatesDao dates, int total_pages, int total_results) {
+        this.page = page;
+        this.results = results;
+        this.dates = dates;
+        this.total_pages = total_pages;
+        this.total_results = total_results;
+    }
+
     protected ListMoviesDao(Parcel in) {
         page = in.readInt();
         if (in.readByte() == 0x01) {

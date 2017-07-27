@@ -35,7 +35,11 @@ import retrofit2.Response;
 public class MovieDetailActivity extends AppCompatActivity implements TrailerAdapter.TrailerAdapterListener,ReviewAdapter.ReviewAdapaterListener{
 
     String TAG = MovieDetailActivity.class.getSimpleName();
-    MovieDao dataMovie;
+
+    MovieDao dataMovie = new MovieDao();
+    ListVideo dataTrailer = new ListVideo();
+    ListReviewsDao dataReview = new ListReviewsDao();
+
     ImageView ivPoster;
     TextView tvTitle,tvDesc,tvVote,tvRelease,tvNoReviews;
     Button btnAddFavorite;
@@ -46,6 +50,9 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
     ProgressDialog progressDialog;
 
     private SQLiteDatabase mDb;
+    private static final String MOVIE_DATA = "movieData";
+    private static final String TRAILER_DATA = "trailerData";
+    private static final String REVIEW_DATA = "reviewData";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +74,22 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         reviewRecyclerView.setLayoutManager(llm2);
         trailerRecyclerView.setLayoutManager(llm);
 
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage("Please Wait Initializing Detail Movie Progress...");
-        progressDialog.show();
-        getData();
+        if(savedInstanceState != null){
+            if(savedInstanceState.containsKey(MOVIE_DATA)){
+                dataMovie = savedInstanceState.getParcelable(MOVIE_DATA);
+                initView();
+            }
+            if(savedInstanceState.containsKey(TRAILER_DATA)){
+                dataTrailer = savedInstanceState.getParcelable(TRAILER_DATA);
+                initViewTrailer(dataTrailer);
+            }
+            if(savedInstanceState.containsKey(REVIEW_DATA)){
+                dataReview = savedInstanceState.getParcelable(REVIEW_DATA);
+                initViewReview(dataReview);
+            }
+        }else{
+            getDataFromAPI();
+        }
         initDB();
     }
 
@@ -80,9 +99,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         context.startActivity(i);
     }
 
-    public void getData(){
-        dataMovie = getIntent().getParcelableExtra("MovieData");
-
+    private void initView(){
         Picasso.with(MovieDetailActivity.this)
                 .load(Constants.BASE_IMAGE_URL_2+dataMovie.backdrop_path)
                 .into(ivPoster);
@@ -90,6 +107,35 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         tvDesc.setText(dataMovie.overview);
         tvVote.setText("Vote Average : "+String.valueOf(dataMovie.vote_average));
         tvRelease.setText("Release Date : "+dataMovie.release_date);
+    }
+
+    private void initViewTrailer(ListVideo dataTrailer){
+        trailerAdapter = new TrailerAdapter(dataTrailer.results,MovieDetailActivity.this,MovieDetailActivity.this);
+        trailerRecyclerView.setAdapter(trailerAdapter);
+        trailerAdapter.notifyDataSetChanged();
+    }
+
+    private void initViewReview(ListReviewsDao dataReview){
+        if(dataReview.results.size() > 0){
+            reviewAdapter = new ReviewAdapter(dataReview.results,MovieDetailActivity.this,MovieDetailActivity.this);
+            reviewRecyclerView.setAdapter(reviewAdapter);
+            reviewAdapter.notifyDataSetChanged();
+
+            tvNoReviews.setVisibility(View.GONE);
+            reviewRecyclerView.setVisibility(View.VISIBLE);
+        }else{
+            tvNoReviews.setVisibility(View.VISIBLE);
+            reviewRecyclerView.setVisibility(View.GONE);
+        }
+    }
+
+    public void getDataFromAPI(){
+        dataMovie = getIntent().getParcelableExtra("MovieData");
+        initView();
+
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Please Wait Initializing Detail Movie Progress...");
+        progressDialog.show();
 
         getTrailer();
         getReviews();
@@ -103,9 +149,8 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         @Override
         public void onResponse(Call<ListVideo> call, Response<ListVideo> response) {
             if(response.isSuccessful()){
-                trailerAdapter = new TrailerAdapter(response.body().results,MovieDetailActivity.this,MovieDetailActivity.this);
-                trailerRecyclerView.setAdapter(trailerAdapter);
-                trailerAdapter.notifyDataSetChanged();
+                dataTrailer = response.body();
+                initViewTrailer(dataTrailer);
 
                 Log.d(TAG,"response success");
             }else {
@@ -130,14 +175,8 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         public void onResponse(Call<ListReviewsDao> call, Response<ListReviewsDao> response) {
             if(response.isSuccessful()){
                 Log.d("Reviews","success");
-                if(response.body().results.size() > 0){
-                    reviewAdapter = new ReviewAdapter(response.body().results,MovieDetailActivity.this,MovieDetailActivity.this);
-                    reviewRecyclerView.setAdapter(reviewAdapter);
-                    reviewAdapter.notifyDataSetChanged();
-                }else{
-                    tvNoReviews.setVisibility(View.VISIBLE);
-                    reviewRecyclerView.setVisibility(View.GONE);
-                }
+                dataReview = response.body();
+                initViewReview(dataReview);
             }else{
                 Log.d("Reviews","failed on response");
             }
@@ -149,11 +188,34 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         }
     };
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(MOVIE_DATA,dataMovie);
+        outState.putParcelable(TRAILER_DATA,dataTrailer);
+        outState.putParcelable(REVIEW_DATA,dataReview);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        dataMovie = savedInstanceState.getParcelable(MOVIE_DATA);
+        dataTrailer = savedInstanceState.getParcelable(TRAILER_DATA);
+        dataReview = savedInstanceState.getParcelable(REVIEW_DATA);
+    }
+
+
     // trailer on Click
     @Override
     public void onClick(VideoData videoData) {
         //Toast.makeText(MovieDetailActivity.this,videoData.key,Toast.LENGTH_LONG).show();
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.WATCH_TRAILER_URL+videoData.key)));
+    }
+
+    // review onClick
+    @Override
+    public void onClick(ReviewDao reviewData) {
+        startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(reviewData.url)));
     }
 
     private void initDB(){
@@ -165,14 +227,11 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         ContentValues cv = new ContentValues();
         cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_ID_MOVIE, dataMovie.id);
         cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_ORIGINAL_TITLE,dataMovie.original_title);
+        cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_OVERVIEW,dataMovie.overview);
+        cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_BACKDROP_PATH,dataMovie.backdrop_path);
         cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_VOTE_AVERAGE,dataMovie.vote_average);
+        cv.put(FavoriteMovieContract.FavoriteEntry.COLUMN_RELEASE_DATE,dataMovie.release_date);
 
         mDb.insert(FavoriteMovieContract.FavoriteEntry.TABLE_NAME,null,cv);
-    }
-
-    // review onClick
-    @Override
-    public void onClick(ReviewDao reviewData) {
-
     }
 }
