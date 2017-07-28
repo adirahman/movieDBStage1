@@ -194,6 +194,7 @@ public class MovieDetailActivity extends AppCompatActivity implements TrailerAda
         outState.putParcelable(MOVIE_DATA,dataMovie);
         outState.putParcelable(TRAILER_DATA,dataTrailer);
         outState.putParcelable(REVIEW_DATA,dataReview);
+
     }
 
     @Override
